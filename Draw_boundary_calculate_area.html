@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Draw a Boundary and Calculate the area</title>
+		<meta name="viewport" content="initial-scale=1.0">
+		<meta charset="utf-8">
+		<style>
+			#map {
+				bottom:0px;
+				height: 100%;
+				left: 362px;
+				position: absolute;
+				right: 0px;
+			}
+			#toggle-drawing {
+				width:27%
+				position:relative;
+				margin-left:10px;
+			}
+      
+			html, body {
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+		<h1>Draw a boundary</h1>
+			<div>
+				<input id="toggle-drawing" type="button" value="Drawing Tools">
+			</div>
+			<hr>
+		</div>	
+		<div id="map">map</>
+		<script>
+			var map;
+			// The global polygon variable is to ensure only one POLYGON is rendered
+			var polygon = null;
+			function initMap() {
+				map = new google.maps.Map(document.getElementById('map'), {
+				center: {lat: 47.66835340000001, lng: -122.1457814},
+				zoom: 17
+				});
+				
+				//initialize the drawing manager
+				var drawingManager = new google.maps.drawing.DrawingManager( {
+				drawingMode: google.maps.drawing.OverlayType.POLYGON,
+				drawingControl:true,
+				drawingControlOptions: 
+					{
+					position: google.maps.ControlPosition.TOP_LEFT,
+					drawingModes: [ google.maps.drawing.OverlayType.POLYGON ]
+					}
+				});
+				
+				document.getElementById('toggle-drawing').addEventListener('click',function() {
+				toggleDrawing(drawingManager); 
+				});
+				
+				drawingManager.addListener('overlaycomplete', function(event) {
+				// First check if there is a existing polygon, if true then remove the polygon
+				if (polygon) {
+					polygon.setMap(null)
+				
+				}
+				
+				//switching the drawing mode to hand
+				drawingManager.setDrawingMode(null)
+				
+				//creating a new editable polygon from the overlay
+				polygon = event.overlay;
+				polygon.setEditable(true);
+				
+				// Calculate Area
+				calculateArea();
+				
+				});
+			}
+			// This function shows/hides the drawing options
+			function toggleDrawing (drawingManager) {
+				if (drawingManager.map) {
+					drawingManager.setMap(null);
+					// 
+					if (polygon) {
+						polygon.setMap(null);
+					}
+				}
+				else {
+					drawingManager.setMap(map)
+				}
+			}
+			
+			// This function calculates the area
+			function calculateArea () {
+				 
+				if (polygon) {
+					area = google.maps.geometry.spherical.computeArea(polygon.getPath());
+					window.alert("The area of the polygon is " + area + " Square Meters");
+					}
+			}
+		</script>
+		// Use your own google API key
+		<script async defer src="https://maps.googleapis.com/maps/api/js?libraries=drawing, geometry&key=MY_KEY&callback=initMap">
+		</script>
+	</body>
+</html>
+
+	 
+	
